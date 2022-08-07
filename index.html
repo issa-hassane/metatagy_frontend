@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="title" content="MetaTagy" />
+    <meta
+      name="description"
+      content="MetaTagy allows you to preview any link,  how it will appear on Google, Twitter, Whatsapp  both on mobile and desktop. "
+    />
+    <meta
+      name="keywords"
+      content="metadata, metatag, preview, metadata preview"
+    />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="language" content="English" />
+    <meta name="author" content="Issa Hassane" />
+
+    <title>MetaTagy | FindCoder Challenge</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico" />
+    <link rel="stylesheet" href="./styles/bootstrap.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat"
+      rel="stylesheet"
+    />
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="styles/styles.css" />
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js"
+    ></script>
+  </head>
+  <body class="min-vh-100 h-100">
+    <!-- alpline component -->
+    <div x-data="metadata()">
+      <section>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+          <div class="container">
+            <a class="navbar-brand fw-bold" id="home" href="/">MetaTagy</a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarColor01"
+              aria-controls="navbarColor01"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div
+              class="collapse navbar-collapse justify-content-around"
+              id="navbarColor01"
+            >
+              <!-- <form class="d-flex w-50"> -->
+              <div class="input-group preview-input w-50">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter a URL"
+                  aria-label="Enter a URL"
+                  aria-describedby="basic-addon2"
+                  required
+                  x-model="url"
+                />
+                <button
+                  href="#"
+                  id="inputGroup-sizing-default"
+                  class="btn btn-secondary input-group-text"
+                  @click="fetchMetadata"
+                >
+                  <i class="bi bi-vr fs-5"></i> Preview
+                </button>
+                <!-- <span x-text="url"></span> -->
+              </div>
+
+              <div>
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="#"
+                      >Home
+                      <span class="visually-hidden">(current)</span>
+                    </a>
+                  </li>
+
+                  <li class="nav-item">
+                    <a class="nav-link" href="#api">API</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </section>
+      <div class="w-100 bg-light d-flex justify-content-center">
+        <div class="p-xs-5 text-center d-flex align-items-center">
+          <img
+            src="./images/illustration.png"
+            class="img-fuid d-none d-md-block d-sm-none"
+            style="width: 30%"
+            alt=""
+          />
+          <div class="welcome">
+            <h1 class="text fw-bold">Welcome to MetaTagy !</h1>
+            <h4 class="text mt-2">A simple link previewer yet powerful</h4>
+          </div>
+        </div>
+      </div>
+      <section>
+        <div class="container mt-5">
+          <!-- isLoading -->
+          <template x-if="isLoading">
+            <div class="d-flex justify-content-center align-items-center m-5">
+              <div class="lds-roller">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            </div>
+          </template>
+          <!-- error message -->
+          <template x-if="isError">
+            <div class="alert alert-dismissible alert-danger m-3">
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+              ></button>
+              <strong>Oups !</strong> Please try to provide a valide link or
+              check your internet conection and try again 😊
+            </div>
+          </template>
+          <!-- data printing -->
+          <template x-if="data">
+            <div class="mb-5">
+              <!-- switch buttons -->
+              <div
+                class="bg-light py-3 w-25 rounded-4 mx-auto d-flex justify-content-center switch-button mb-3"
+              >
+                <div
+                  class="btn-group"
+                  role="group"
+                  aria-label="Basic radio toggle button group"
+                >
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="btnradio"
+                    id="btnradio1"
+                    autocomplete="off"
+                    checked=""
+                    @click="tab = 'Previews'"
+                  />
+                  <label class="btn btn-outline-primary" for="btnradio1"
+                    >Previews
+                  </label>
+
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="btnradio"
+                    id="btnradio3"
+                    autocomplete="off"
+                    @click="tab = 'simple_prev'"
+                  />
+                  <label class="btn btn-outline-primary" for="btnradio3"
+                    >Metatags</label
+                  >
+                </div>
+              </div>
+              <!-- tabs -->
+              <div x-show="tab === 'Previews'">
+                <div class="container mt-4">
+                  <!-- <span x-text="data['url']"></span> -->
+                  <div class="row">
+                    <!-- mobile preview  -->
+                    <a
+                      :href="data['url']"
+                      class="fw-semibold text-decoration-none"
+                      target="_blank"
+                      >Visit the link</a
+                    >
+                    <hr class="mt-1" />
+                    <div class="col-sm-12 col-xl-4 pb-4 border">
+                      <!-- Google row -->
+                      <div class="row">
+                        <div class="col">
+                          <h6 class="m-3">Mobile Preview</h6>
+                          <p class="text-muted ms-2 mb-1 fw-bold">Google</p>
+                          <hr class="m-1" />
+
+                          <div class="card mt-4" style="width: 95%">
+                            <div class="card-body">
+                              <div class="row">
+                                <div class="col-2">
+                                  <div
+                                    class="position-relative rounded-circle bg-light"
+                                    style="height: 45px; width: 45px"
+                                  >
+                                    <img
+                                      class="img-fluid position-absolute top-50 start-50 translate-middle w-75"
+                                      :src="data['image'] || './images/notFound.png'"
+                                      alt=""
+                                    />
+                                  </div>
+                                </div>
+                                <div class="col-9 mb-2">
+                                  <div>
+                                    <!-- <p class="m-0">npm.js</p> -->
+                                    <p
+                                      class="mt-2 text-muted"
+                                      x-text="data['og:url'].slice(0,32) || data['url'].slice(0,32)"
+                                    ></p>
+                                  </div>
+                                </div>
+                                <div class="col-1">
+                                  <i class="bi bi-three-dots-vertical"></i>
+                                </div>
+                              </div>
+                              <div class="mx-2">
+                                <a
+                                  class="fs-5 text-decoration-none"
+                                  x-text="data['og:title'].slice(0,62) || (data['title'] + '-' + data['og:site_name']).slice(0,62)"
+                                ></a>
+                                <p
+                                  class="mt-2"
+                                  x-text="data['description'].slice(0,134) +' ...'"
+                                ></p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- twitter row -->
+                      <div class="row">
+                        <div class="col">
+                          <div class="my-4">
+                            <p class="text-muted ms-2 mb-1 fw-bold">Twitter</p>
+                            <hr class="m-1" />
+                          </div>
+                          <div class="card" style="width: 80%">
+                            <div class="row g-0">
+                              <div class="col-4">
+                                <img
+                                  :src="data['image'] || './images/notFound.png'"
+                                  class="img-fluid img-fit w-100 h-100 rounded-start"
+                                  alt="..."
+                                />
+                              </div>
+                              <div class="col-8 my-auto">
+                                <div class="card-body">
+                                  <p
+                                    class="m-0"
+                                    x-text="data['twitter:title'].slice(0,30) || data['title'] "
+                                  ></p>
+                                  <p
+                                    class="m-0 text-muted"
+                                    x-text="data['source']"
+                                  ></p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- whatsapp  -->
+                      <div class="row">
+                        <div class="col">
+                          <div class="my-4">
+                            <p class="text-muted ms-2 mb-1 fw-bold">Whatsapp</p>
+                            <hr class="m-1" />
+                          </div>
+                          <div
+                            class="card shadow-none border rounded-3 mx-auto pb-1"
+                            style="
+                              width: 75%;
+                              min-height: 75%;
+                              background-color: #25d36564;
+                            "
+                          >
+                            <img
+                              :src="data['image'] || './images/notFound.png'"
+                              class="card-img-top img-fluid img-fit"
+                              alt="..."
+                            />
+                            <div class="card-body">
+                              <p class="m-0 fw-bold" x-text="data['title']"></p>
+                              <p
+                                class="m-0 text-muted"
+                                x-text="data['source']"
+                              ></p>
+                              <p
+                                class="m-0 text-muted fw-light"
+                                x-text="data['description'].slice(0,40)"
+                              ></p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Desktop preview -->
+                    <div class="col-sm-12 col-xl-8 border">
+                      <h6 class="m-3">Desktop Preview</h6>
+                      <div class="row">
+                        <!-- google row -->
+                        <div class="col">
+                          <p class="text-muted ms-2 mb-1 fw-bold">Google</p>
+                          <hr class="m-1" />
+
+                          <div class="card mt-4 shadow" style="width: 95%">
+                            <div class="card-body">
+                              <div class="d-flex ms-2">
+                                <p
+                                  class="m-0"
+                                  x-text="data['og:url'].slice(0,62) || data['url'].slice(0,62)+' ...'"
+                                ></p>
+                                <i class="bi bi-three-dots-vertical ms-4"></i>
+                              </div>
+
+                              <div class="mx-2">
+                                <a
+                                  class="fs-5 text-decoration-none"
+                                  x-text="data['og:title'].slice(0,62) || (data['title'] + '-' + data['']).slice(0,62)"
+                                ></a>
+                                <p
+                                  class="mt-2"
+                                  x-text="data['description'].slice(0, 135) + '...'"
+                                ></p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- twitter row -->
+                      <div class="row">
+                        <div class="col">
+                          <div class="my-4">
+                            <p class="text-muted ms-2 mb-1 fw-bold">Twitter</p>
+                            <hr class="m-1" />
+                          </div>
+                          <div
+                            class="card shadow-none border mx-auto"
+                            style="
+                              width: 70%;
+                              min-height: 85%;
+                              border-radius: 2rem;
+                            "
+                          >
+                            <div>
+                              <img
+                                :src="data['image'] || './images/notFound.png'"
+                                class="card-img-top img-fit"
+                                alt="..."
+                                style="border-radius: 2rem 2rem 0 0 !important"
+                              />
+                            </div>
+                            <div class="card-body">
+                              <p
+                                class="m-1 text-muted"
+                                x-text="data['source']"
+                              ></p>
+                              <p
+                                class="m-1 fw-semibold"
+                                x-text="data['twitter:title'] || data['title']"
+                              ></p>
+                              <p
+                                class="m-1 text-muted"
+                                x-text="data['og:description'].slice(0, 135) || data['description'].slice(0, 135) + '...'"
+                              ></p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- whatsapp  -->
+                      <div class="row">
+                        <div class="col">
+                          <div class="my-4">
+                            <p class="text-muted ms-2 mb-1 fw-bold">Whatsapp</p>
+                            <hr class="m-1" />
+                          </div>
+                          <div
+                            class="card shadow-none border rounded-3 mx-auto pb-1 mb-3"
+                            style="
+                              width: 70%;
+                              min-height: 82%;
+                              background-color: #25d36564;
+                            "
+                          >
+                            <img
+                              :src="data['image'] || './images/notFound.png'"
+                              class="card-img-top img-fit"
+                              alt="..."
+                            />
+                            <div class="card-body">
+                              <p class="m-0 fw-bold" x-text="data['title']"></p>
+                              <p
+                                class="m-0 text-muted"
+                                x-text="data['source'] "
+                              ></p>
+                              <p
+                                class="m-0 text-muted fw-light"
+                                x-text="data['description'].slice(0,113)"
+                              ></p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div x-show="tab =='simple_prev'">
+                <div class="container mt-5">
+                  <div class="my-4 w-50 mx-auto">
+                    <a
+                      :href="data['url']"
+                      class="fw-semibold text-decoration-none"
+                      target="_blank"
+                      >Visit the link</a
+                    >
+                    <hr class="mt-1" />
+                    <p class="fw-semibold ms-2">Image</p>
+                    <div
+                      class="card mb-4 w-100"
+                      style="min-height: 85%; border-radius: 2rem"
+                    >
+                      <div class="card-body">
+                        <img
+                          :src="data['image'] || './images/notFound.png'"
+                          class="img-fuid img-fit w-100"
+                          style="min-height: 80%; border-radius: 2rem"
+                          alt=""
+                        />
+                      </div>
+                    </div>
+                    <p class="fw-semibold">Title</p>
+
+                    <div class="card mb-4 p-2 bg-light">
+                      <div class="card-body" x-text="data['title']"></div>
+                    </div>
+                    <p class="fw-semibold ms-2">Description</p>
+
+                    <div class="card mb-4 p-2 bg-light">
+                      <div class="card-body" x-text="data['description']"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+      <!-- alpline component -->
+      <div class="container">
+        <h3 id="api">How to use the API</h3>
+        <br />
+        <h4>Request:</h4>
+        <div class="row border border-primary w-75 text-center mt-4 ms-2">
+          <div class="col-md-2 bg-primary">
+            <p class="text-white my-3">GET</p>
+          </div>
+          <div class="col-md-10 bg-light">
+            <p class="my-3 font-monospace">
+              https://thawing-bayou-13413.herokuapp.com/metadata/?q=findcoder.io
+            </p>
+          </div>
+        </div>
+        <p class="mt-3">
+          *Specify the query param <span class="fw-bold">q=</span>
+        </p>
+        <h4 class="mt-4">Response:</h4>
+        <div
+          class="border-start border-5 border-primary w-100 bg-light mt-3 p-2"
+        >
+          <p class="m-3 font-monospace">
+            { url: 'https://www.findcoder.io/', canonical:
+            'https://findcoder.io', title: 'FindCoder | Welcome', image:
+            'https://findcoder.io/logos/fc_logo.png', author: 'FindCoder',
+            description: 'A central location to find coders. Collab or hire
+            coders with no middleman. An open platform to hire coders based on
+            skills and projects. Showcase your work! Participate in challenges
+            and win exciting prizes and goodies. Improve your portfolio and get
+            interview ready with real world knowledge.', keywords: 'FindCoder,
+            coders, programmers, software devs, software developers, hire
+            coders, hire coders online, hire coders all over the
+            worldundefined', source: 'www.findcoder.io', price: '',
+            priceCurrency: '', availability: '', robots: '', 'og:url':
+            'https://findcoder.io/', 'og:locale': '', 'og:locale:alternate': '',
+            'og:title': 'FindCoder | Welcome', 'og:type': 'website',
+            'og:description': 'A central location to find coders. Collab or hire
+            coders with no middleman. An open platform to hire coders based on
+            skills and projects. Showcase your work! Participate in challenges
+            and win exciting prizes and goodies. Improve your portfolio and get
+            interview ready with real world knowledge.', 'og:determiner': '',
+            'og:site_name': 'FindCoder.io', 'og:image':
+            'https://findcoder.io/logos/fc_logo.png', 'og:image:secure_url': '',
+            'og:image:type': '', 'og:image:width': '', 'og:image:height': '',
+            'twitter:title': 'FindCoder | Welcome', 'twitter:image':
+            'https://findcoder.io/logos/fc_logo.png', 'twitter:image:alt': '',
+            'twitter:card': 'summary_large_image', 'twitter:site': '@FindCoder',
+            'twitter:site:id': '', 'twitter:account_id': '', 'twitter:creator':
+            '@FindCoder', 'twitter:creator:id': '', 'twitter:player': '',
+            'twitter:player:width': '', 'twitter:player:height': '',
+            'twitter:player:stream': '', 'twitter:description': 'A central
+            location to find coders. Collab or hire coders with no middleman. An
+            open platform to hire coders based on skills and projects. Showcase
+            your work! Participate in challenges and win exciting prizes and
+            goodies. Improve your portfolio and get interview ready with real
+            world knowledge.', 'twitter:domain': 'https://findcoder.io/',
+            'twitter:image:src': 'https://findcoder.io/logos/fc_logo.png',
+            viewport: 'width=device-width, initial-scale=1.0',
+            'next-head-count': '25', jsonld: {} }
+          </p>
+        </div>
+      </div>
+    </div>
+    <br /><br /><br />
+    <!-- footer section -->
+    <!-- <div class="container"> -->
+    <footer class="py-3 mt-4 bg-primary position-absolute w-100">
+      <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+        <li class="nav-item">
+          <a href="#home" class="nav-link px-2 text-white">Home</a>
+        </li>
+        <li class="nav-item">
+          <a href="#api" class="nav-link px-2 text-white">API</a>
+        </li>
+      </ul>
+      <p class="text-center text-white">© 2022 Made with 💖 by Issa Hassane</p>
+    </footer>
+    <!-- </div> -->
+    <script>
+      function metadata(e) {
+        // console.log(this.url);
+        return {
+          url: "",
+          tab: "Previews",
+          isLoading: false,
+          isError: false,
+          data: null,
+          fetchMetadata() {
+            this.isError = false;
+            this.isLoading = true;
+            fetch(
+              `https://thawing-bayou-13413.herokuapp.com/metadata/?q=${this.url}`
+            )
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                }
+                console.log("there was some error  " + response.ok);
+                throw new Error("Something went wrong");
+              })
+              .then((responseJson) => {
+                // Do something with the response
+                this.isLoading = false;
+                this.data = responseJson;
+                console.log(responseJson);
+              })
+              .catch((error) => {
+                this.isError = true;
+                this.isLoading = false;
+
+                console.log(error.stack);
+              });
+          },
+        };
+      }
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
