@@ -11,7 +11,7 @@ Metatagy is web app that allows you to preview a given link. Through it you can 
 - And you just have to open the index.html file in browser that is it since the front-end is built with Bootstrap and Alpline js, all the CDN are included in
 the HTML file. To know more about the project(back end) cliked on the link above, it will redirect you to the back end repo.
 
-
+> NOTE: the hosted back-end code of this front-end project is down (Heroku has stopped the free tier)
 [Deployed Link](https://issa-hassane.github.io/metatagy_frontend/)
 
 
